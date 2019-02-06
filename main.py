@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from multiping import multi_ping
 from netmiko import ConnectHandler
 import re
@@ -26,7 +26,7 @@ for n in audag_cn_raw:
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/audag')
 def hello_world():
-    return 'Hello, World!'
+    return jsonify(audag_cluster_nodes)
 
