@@ -6,8 +6,8 @@
 </head>
 <body>
     <div class="container">
-        <button c="button" v-on:click="counts++">
-            {{ counts }}
+        <button c="button" v-on:click="update_nodes">
+            ОБНОВИТЬ
         </button>
         <pre> {{ nodes }} </pre>
         <pre> {{ words }} </pre>
@@ -28,7 +28,6 @@
             data: { 
                 nodes : nodes,
                 words: words,
-                counts: 0
             },
             methods: {
                 update_nodes: function() {

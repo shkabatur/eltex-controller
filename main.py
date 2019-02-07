@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from multiping import multi_ping
 from netmiko import ConnectHandler
 import re
@@ -25,6 +25,12 @@ for n in audag_cn_raw:
    
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+@app.route('/')
+def index():
+   return send_from_directory('templates', 'index.html')
+
 
 @app.route('/audag')
 def hello_world():
