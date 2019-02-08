@@ -22,6 +22,7 @@ node = {}
 for n in audag_cn_raw:
    (node['name'], node['ip'], node['mac'], node['firmver']) = n.split()
    audag_cluster_nodes.append(node)
+   node = {}
    
 
 app = Flask(__name__)
