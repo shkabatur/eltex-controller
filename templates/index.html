@@ -38,7 +38,7 @@
 					</td>
 					<td>{{ node.ping.toFixed(1) }}ms </td>
 					<td> {{ node.firmver }} </td>
-					<td> <button type="button" class="btn btn-danger"> restart </button> <td>
+					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> <td>
 				</tr>
 			</tbody>
 		</table>
@@ -46,7 +46,8 @@
 	  </div>
 	</div>
 </body>
-
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script type="text/javascript">
         var vm = new Vue({
@@ -54,8 +55,14 @@
             data: { 
                 nodes : {},
             },
+            methods: {
+                reboot: function(ip){
+                    if (confirm("Вы уверены ?")) {
+                        axios.post('/reboot', {"ip": ip});
+                    };
+                },
+            },
 			//запускается сразу после монтирования всех компонентов, и начинает обновлять таблицу
-            
 			mounted : function() {
                 fetch("http://localhost:5000/audag")
 								.then(function(response){return response.json()})

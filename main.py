@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 from multiping import multi_ping
 from netmiko import ConnectHandler
 import re
@@ -33,6 +33,18 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def index():
    return send_from_directory('templates', 'index.html')
 
+@app.route('/reboot', methods=['POST'])
+def reboot():
+   r = request.get_json()
+   print("reboot this node: ",r)
+   node_to_reboot = {
+      'device_type' : 'eltex',
+      'ip': r['ip'],
+      'username' : username,
+      'password' : password,
+   }
+   connect_handler = ConnectHandler(**node_to_reboot).send_command('/splashbin/reboot')
+   return str(r)
 
 @app.route('/audag')
 def hello_world():
