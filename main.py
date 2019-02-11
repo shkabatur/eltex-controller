@@ -15,12 +15,13 @@ audag = {
 #получаем список точек в кластере делим их на строки и удаляем первые
 #три ненужные строки
 audag_cn_raw = ConnectHandler(**audag).send_command(
-    '/splashbin/get  cluster-member location ip mac firmware-version').split('\n')[2:]
+    '/splashbin/get  cluster-member location ip mac firmware-version compat').split('\n')[3:]
 
 audag_cluster_nodes = []
 node = {} 
 for n in audag_cn_raw:
-   (node['name'], node['ip'], node['mac'], node['firmver']) = n.split()
+   print(n.split)
+   node['name'], node['ip'], node['mac'], node['firmver'], node['model'] = n.split()
    audag_cluster_nodes.append(node)
    node = {}
    
@@ -35,5 +36,17 @@ def index():
 
 @app.route('/audag')
 def hello_world():
-    return jsonify(audag_cluster_nodes)
+    #копируем в переменную nodes точки в кластере 
+    nodes = audag_cluster_nodes.copy()
+    #создаем массив с ip'шниками для multi_ping
+    ips = [ n['ip'] for n in nodes]
+    resp, no_resp = multi_ping(ips, timeout=2, retry=3)
+    for n in nodes:
+       if n['ip'] in resp:
+          n['ping'] = resp[n['ip']] * 1000
+          n['status'] = True
+       else:
+          n['ping'] = 9999
+          n['status'] = False
+    return jsonify(nodes)
 
