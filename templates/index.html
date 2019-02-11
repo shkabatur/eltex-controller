@@ -7,7 +7,8 @@
 
 <body>
     <div class="container">
-		<table id="mytable" class="table table-striped table-hover" >
+		<div class="vue">
+		<table  class="table table-striped table-responsive" >
 			<thead>
 				<tr>
 					<th class="col-md-1" scope="col">name</th>
@@ -22,10 +23,10 @@
 			</thead>
 			<tbody >
 				<tr  v-for="node in nodes" :key="node.name">
-					<td> {{ node.name }} </td>
-					<td> {{ node.ip }} </td>
-					<td> {{ node.mac }} </td>
-					<td> {{ node.model }} </td>
+					<th>{{node.name}}</th>
+					<td>{{node.ip}}</td>
+					<td>{{ node.mac}}</td>
+					<td>{{node.model}}</td>
 					<td>
 						<template v-if="node.status">
 							<font color="green"> connected </font>
@@ -34,20 +35,21 @@
 							<font color="red"> disconnected </font>
 						</template>
 					</td>
-					
 					<td>{{ node.ping.toFixed(1) }}ms </td>
 					<td> {{ node.firmver }} </td>
 					<td> <button class="button"> restart </button> <td>
 				</tr>
 			</tbody>
 		</table>
+	
+	  </div>
 	</div>
 </body>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script type="text/javascript">
         var vm = new Vue({
-            el: '.container',
+            el: '.vue',
             data: { 
                 nodes : {},
             },
