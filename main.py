@@ -2,8 +2,9 @@ from flask import Flask, jsonify, send_from_directory, request
 from multiping import multi_ping
 from netmiko import ConnectHandler
 import re
+import time
 
-username = "root"
+username = "admin"
 password = "T$2z-artek"
 
 audag = {
@@ -12,18 +13,43 @@ audag = {
     'username': username,
     'password': password, }
 
+guest = {
+   'device_type' : 'eltex',
+   'ip':   '10.55.13.111',
+   'username': username,
+   'password': password, }
+
 #получаем список точек в кластере делим их на строки и удаляем первые
 #три ненужные строки
+
+
+guest_cn_raw = ConnectHandler(**guest).send_command(
+   'get cluster-member location ip mac firmware-version').split('\n')[2:]
+print(guest_cn_raw)
+
 audag_cn_raw = ConnectHandler(**audag).send_command(
-    '/splashbin/get  cluster-member location ip mac firmware-version compat').split('\n')[3:]
+   'get cluster-member location ip mac firmware-version compat').split('\n')[3:]
+print(audag_cn_raw)
+time.sleep(1)
+
 
 audag_cluster_nodes = []
+guest_cluster_nodes = []
+
+node = {} 
+for n in guest_cn_raw:
+   print(n.split)
+   node['name'], node['ip'], node['mac'], node['firmver'] = n.split()
+   guest_cluster_nodes.append(node)
+   node = {}
+
 node = {} 
 for n in audag_cn_raw:
    print(n.split)
    node['name'], node['ip'], node['mac'], node['firmver'], node['model'] = n.split()
    audag_cluster_nodes.append(node)
    node = {}
+
    
 
 app = Flask(__name__)
@@ -47,9 +73,25 @@ def reboot():
    return str(r)
 
 @app.route('/audag')
-def hello_world():
+def get_audag():
     #копируем в переменную nodes точки в кластере 
     nodes = audag_cluster_nodes.copy()
+    #создаем массив с ip'шниками для multi_ping
+    ips = [ n['ip'] for n in nodes]
+    resp, no_resp = multi_ping(ips, timeout=2, retry=3)
+    for n in nodes:
+       if n['ip'] in resp:
+          n['ping'] = resp[n['ip']] * 1000
+          n['status'] = True
+       else:
+          n['ping'] = 9999
+          n['status'] = False
+    return jsonify(nodes)
+
+@app.route('/guest')
+def get_guest():
+    #копируем в переменную nodes точки в кластере 
+    nodes = guest_cluster_nodes.copy()
     #создаем массив с ip'шниками для multi_ping
     ips = [ n['ip'] for n in nodes]
     resp, no_resp = multi_ping(ips, timeout=2, retry=3)

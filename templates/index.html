@@ -9,13 +9,15 @@
 <body>
     <div class="container">
 		<div class="vue">
+        <button type="button" class="btn" v-on:click='swap_cluster("guest")'>guest</button>
+        <button type="button" class="btn" v-on:click='swap_cluster("audag")'>audag</button>
 		<table  class="table table-striped table-responsive" >
 			<thead>
 				<tr>
 					<th > <button type="button" class="btn btn-primary">name</button></th>
 					<th > <button type="button" class="btn btn-primary">ip</button></th>
 					<th > <button type="button" class="btn btn-primary">mac</button></th>
-					<th > <button type="button" class="btn btn-primary">model</button></th>
+					<th v-if="cluster_name === 'audag'"> <button type="button" class="btn btn-primary">model</button></th>
 					<th > <button type="button" class="btn btn-primary">status</button></th>
 					<th > <button type="button" class="btn btn-primary">ping</button></th>
 					<th > <button type="button" class="btn btn-primary">version</button></th>
@@ -27,7 +29,7 @@
 					<th>{{node.name}}</th>
 					<td>{{node.ip}}</td>
 					<td>{{ node.mac}}</td>
-					<td>{{node.model}}</td>
+					<td v-if="node.model">{{node.model}}</td>
 					<td>
 						<template v-if="node.status">
 							<font color="green"> connected </font>
@@ -50,12 +52,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script type="text/javascript">
+        var cluster_name = "audag";
         var vm = new Vue({
             el: '.vue',
             data: { 
                 nodes : {},
+                cluster_name: cluster_name,
             },
             methods: {
+                swap_cluster: function(name) {
+                    vm.nodes = {};
+                    vm.cluster_name = name;
+                },
                 reboot: function(ip){
                     if (confirm("Вы уверены ?")) {
                         axios.post('/reboot', {"ip": ip});
@@ -64,7 +72,7 @@
             },
 			//запускается сразу после монтирования всех компонентов, и начинает обновлять таблицу
 			mounted : function() {
-                fetch("http://localhost:5000/audag")
+                fetch("http://localhost:5000/" + cluster_name)
 								.then(function(response){return response.json()})
 								.then(function(data){
 									for (var key in data) {
@@ -74,7 +82,7 @@
 								});
 				this.$nextTick(function () {	
 					setInterval(() => {
-							fetch("http://localhost:5000/audag")
+							fetch("http://localhost:5000/" + vm.cluster_name)
 								.then(function(response){return response.json()})
 								.then(function(data){
 									for (var key in data) {
