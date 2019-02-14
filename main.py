@@ -100,11 +100,21 @@ def get_guest():
 
 @app.route('/detail',methods=['POST'])
 def get_detail():
-   r = request.get_json()
-   node = {
-   'device_type' : 'eltex',
-   'ip':   r["ip"],
-   'username': username,
-   'password': password, }
-   print(r["ip"])
-   return jsonify({"ip":r["ip"]})
+    r = request.get_json()
+    some_node = {
+        'device_type' : 'eltex',
+        'ip':   r["ip"],
+        'username': username,
+        'password': password, }
+    raw_nodes = ConnectHandler(**some_node).send_command(
+        'get association detail').split('Property               Value\n-----------------------------------------------\n')[1:]
+    client_nodes = []
+    node = {}
+    for n in raw_nodes:
+        for params in n.split('\n'):
+            p = params.split()
+            if(len(p) > 1):
+                node[p[0]] = p[1]
+        client_nodes.append(node)
+        node = {}
+    return jsonify(client_nodes)

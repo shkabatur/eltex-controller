@@ -40,7 +40,8 @@
 					</td>
 					<td>{{ node.ping.toFixed(1) }}ms </td>
 					<td> {{ node["firmware-version"] }} </td>
-					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> <td>
+					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> </td>
+					<td> <button v-on:click='alert("DETAIL")' type="button" class="btn btn-info"> подробно </button> </td>
 				</tr>
 			</tbody>
 		</table>
