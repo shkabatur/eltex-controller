@@ -28,7 +28,7 @@ guest_cn_raw = ConnectHandler(**guest).send_command(
 print(guest_cn_raw)
 
 audag_cn_raw = ConnectHandler(**audag).send_command(
-   'get cluster-member location ip mac firmware-version compat').split('\n')[3:]
+   'get cluster-member location ip mac firmware-version compat').split('\n')[2:]
 print(audag_cn_raw)
 time.sleep(1)
 
@@ -69,7 +69,7 @@ def reboot():
       'username' : username,
       'password' : password,
    }
-   connect_handler = ConnectHandler(**node_to_reboot).send_command('/splashbin/reboot')
+   connect_handler = ConnectHandler(**node_to_reboot).send_command('reboot')
    return str(r)
 
 @app.route('/audag')
@@ -104,3 +104,13 @@ def get_guest():
           n['status'] = False
     return jsonify(nodes)
 
+@app.route('/detail',methods=['POST'])
+def get_detail():
+   r = request.get_json()
+   node = {
+   'device_type' : 'eltex',
+   'ip':   r["ip"],
+   'username': username,
+   'password': password, }
+   print(r["ip"])
+   return jsonify({"ip":r["ip"]})
