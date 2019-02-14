@@ -20,31 +20,35 @@ guest = {
    'username': username,
    'password': password, }
 
-guest_cn_raw = ConnectHandler(**guest).send_command(
-    'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
-audag_cn_raw = ConnectHandler(**audag).send_command(
-    'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
+#получаем список точек в кластере делим их на строки и удаляем первые
+#три ненужные строки
 
-guest_cluster_nodes = []
+
+guest_cn_raw = ConnectHandler(**guest).send_command(
+   'get cluster-member location ip mac firmware-version').split('\n')[2:]
+
+
+audag_cn_raw = ConnectHandler(**audag).send_command(
+   'get cluster-member location ip mac firmware-version compat').split('\n')[2:]
+
+
+
 audag_cluster_nodes = []
+guest_cluster_nodes = []
 
 node = {} 
 for n in guest_cn_raw:
-    for params in n.split('\n'):
-        p = params.split()
-        if(p):
-            node[p[0]] = p[1]
-    guest_cluster_nodes.append(node)
-    node = {}
+   node['name'], node['ip'], node['mac'], node['firmver'] = n.split()
+   guest_cluster_nodes.append(node)
+   node = {}
 
 node = {} 
 for n in audag_cn_raw:
-    for params in n.split('\n'):
-        p = params.split()
-        if(p):
-            node[p[0]] = p[1]
-    audag_cluster_nodes.append(node)
-    node = {}
+   node['name'], node['ip'], node['mac'], node['firmver'], node['model'] = n.split()
+   audag_cluster_nodes.append(node)
+   node = {}
+pprint(guest_cluster_nodes)
+   
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True

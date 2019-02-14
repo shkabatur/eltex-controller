@@ -17,7 +17,7 @@
 					<th > <button type="button" class="btn btn-primary">Имя</button></th>
 					<th > <button type="button" class="btn btn-primary">IP</button></th>
 					<th > <button type="button" class="btn btn-primary">Мак-адрес</button></th>
-					<th > <button type="button" class="btn btn-primary">модель</button></th>
+					<th v-if="cluster_name === 'audag'"> <button type="button" class="btn btn-primary">модель</button></th>
 					<th > <button type="button" class="btn btn-primary">Статус</button></th>
 					<th > <button type="button" class="btn btn-primary">Пинг</button></th>
 					<th > <button type="button" class="btn btn-primary">Версия прошивки</button></th>
@@ -25,11 +25,11 @@
 				</tr>
 			</thead>
 			<tbody >
-				<tr  v-for="node in nodes"> 
-					<th>{{node.location}}</th>
+				<tr  v-for="node in nodes" :key="node.name"> 
+					<th>{{node.name}}</th>
 					<td>{{node.ip}}</td>
 					<td>{{node.mac}}</td>
-					<td>{{node.compat}}</td>
+					<td v-if="node.model">{{node.model}}</td>
 					<td>
 						<template v-if="node.status">
 							<font color="green"> connected </font>
@@ -39,7 +39,7 @@
 						</template>
 					</td>
 					<td>{{ node.ping.toFixed(1) }}ms </td>
-					<td> {{ node["firmware-version"] }} </td>
+					<td> {{ node.firmver }} </td>
 					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> <td>
 				</tr>
 			</tbody>
@@ -82,7 +82,7 @@
 								.then(function(response){return response.json()})
 								.then(function(data){
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										Vue.set(vm.nodes, data[key].name, data[key])
 									}
 								
 								});
@@ -94,7 +94,7 @@
 								.then(function(response){return response.json()})
 								.then(function(data){
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										Vue.set(vm.nodes, data[key].name, data[key])
 									}
 								});
 				this.$nextTick(function () {	
@@ -103,7 +103,7 @@
 								.then(function(response){return response.json()})
 								.then(function(data){
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										Vue.set(vm.nodes, data[key].name, data[key])
 									}
 								
 								});

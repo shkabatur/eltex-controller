@@ -96,6 +96,7 @@ def get_guest():
        else:
           n['ping'] = 9999
           n['status'] = False
+    print(jsonify(nodes))
     return jsonify(nodes)
 
 @app.route('/detail',methods=['POST'])
