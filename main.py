@@ -14,6 +14,13 @@ audag = {
     'username': username,
     'password': password, }
 
+boss = {
+    'device_type' : 'eltex',
+    'ip':   '172.16.13.222',
+    'username': username,
+    'password': password, }
+
+
 guest = {
    'device_type' : 'eltex',
    'ip':   '10.55.13.111',

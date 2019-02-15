@@ -11,23 +11,24 @@
 		<div class="vue">
 		<button type="button" class="btn" v-on:click='swap_cluster("audag")'>Аюдаг</button>
         <button type="button" class="btn" v-on:click='swap_cluster("guest")'>Гость</button>
+		
 		<div class="row">
 		<div class="table-responsive col-md-6 table-striped">
 		<table  class="table" >
 			<thead>
 				<tr>
-					<th > <button type="button" class="btn btn-primary btn-block">Имя</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">IP</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">Мак-адрес</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">Модель</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">Статус</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">Пинг</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block">Прошивка</button></th>
+					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="location"'>Имя</button></th>
+					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="ip"'>IP</button></th>
+					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="mac"'>Мак-адрес</button></th>
+					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="compat"'>Модель</button></th>
+					<th > Статус</th>
+					<th > Пинг</th>
+					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="firmware-version"'>Прошивка</button></th>
 					<th > Перезагрузка</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr  v-for="node in nodes"> 
+				<tr  v-for="node in array_nodes"> 
 					<th>{{node.location}}</th>
 					<td>{{node.ip}}</td>
 					<td>{{node.mac}}</td>
@@ -40,17 +41,16 @@
 							<font color="red"> disconnected </font>
 						</template>
 					</td>
-					<td>{{ node.ping.toFixed(1) }}ms </td>
-					<td> {{ node["firmware-version"] }} </td>
+					<td>{{node.ping.toFixed(1)}}ms </td>
+					<td>{{node["firmware-version"]}} </td>
 					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> </td>
 					<td> <button v-on:click='detail(node.ip)' type="button" class="btn btn-info"> подробно </button> </td>
 				</tr>
 			</tbody>
 		</table>
 		</div>
-		
-		<div class="table-responsive col-md-6 table-striped">
-		<table  class="table" v-if="node_detail" >
+		<div class="table-responsive table-striped col-md-6 ">
+		<table  class="table" >
 			<thead>
 				<tr>
 					<th> IP</th>
@@ -67,7 +67,7 @@
 					<th>{{node["ip-address"]}}</th>
 					<td>{{node.hostname}}</td>
 					<td>{{node.station}}</td>
-					<template v-if="node.interface === 'wlan0'">
+					<template v-if="node.interface === 'wlan1'">
 						<td>2.4 Ггц</td>
 					</template>
 					<template v-else>
@@ -81,7 +81,6 @@
 			</tbody>
 		</table>
 		</div>
-	
 	  </div>
 	</div>
 	</div>
@@ -94,21 +93,24 @@
         var vm = new Vue({
             el: '.vue',
             data: { 
-                nodes : {},
+				array_nodes: [],
                 cluster_name: cluster_name,
-				node_detail: {},
+				node_detail: [],
+				sort_by: "location",
             },
             methods: {
-                swap_cluster: function(name) {
-                    vm.nodes = {};
+                swap_cluster: function(name) {;
                     vm.cluster_name = name;
 					vm.fast_init();
                 },
-				detail: function(ip) {
-					vm.node_detail = {};
+				detail: function(ip) {	
+					vm.node_detail = [{'station':'Идет загрузка', 'hostname':'Подождите'}];
 					axios.post('/detail', {"ip": ip}).then(function(response){
+						console.log(response.data);
+						vm.node_detail = []
 						for(var key in response.data) {
-								Vue.set(vm.node_detail, response.data[key].station, response.data[key])
+								//Vue.set(vm.node_detail, response.data[key].station, response.data[key])
+								vm.node_detail.push(response.data[key]);
 						}
 					});
 				},
@@ -117,12 +119,28 @@
                         axios.post('/reboot', {'ip': ip});
                     };
                 },
+				sort_by_key:	function(key) {
+					vm.array_nodes.sort(function(a,b){
+						var keyA = a[key].toUpperCase();
+						var keyB = b[key].toUpperCase();
+						if (keyA < keyB) {
+							return -1;
+						}
+						if (keyA > keyB) {
+							return 1;
+						}
+						return 0;
+					});
+				},
 				fast_init: function() {
 					fetch(window.location.href + vm.cluster_name)
 								.then(function(response){return response.json()})
 								.then(function(data){
+									vm.array_nodes = [];
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										vm.array_nodes.push(data[key]);
+										vm.sort_by_key(vm.sort_by);
+										
 									}
 								
 								});
@@ -133,8 +151,10 @@
                 fetch(window.location.href + cluster_name)
 								.then(function(response){return response.json()})
 								.then(function(data){
+									vm.array_nodes = [];
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										vm.array_nodes.push(data[key]);
+										vm.sort_by_key(vm.sort_by);
 									}
 								});
 				this.$nextTick(function () {	
@@ -142,8 +162,10 @@
 							fetch(window.location.href + vm.cluster_name)
 								.then(function(response){return response.json()})
 								.then(function(data){
+									vm.array_nodes = [];
 									for (var key in data) {
-										Vue.set(vm.nodes, data[key].mac, data[key])
+										vm.array_nodes.push(data[key]);
+										vm.sort_by_key(vm.sort_by);
 									}
 								
 								});
