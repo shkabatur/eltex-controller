@@ -1,9 +1,13 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous"> 
     <title> LOL </title>
     <link rel="icon" type="image/png" href="https://static.artek.org/static/img/favicon.ico" />
+    <style type="text/css">
+        tr {height:10px;}
+        td {padding:0px;}
+    </style>
 </head>
 
 <body>
@@ -17,13 +21,13 @@
 		<table  class="table" >
 			<thead>
 				<tr>
-					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="location"'>Имя</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="ip"'>IP</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="mac"'>Мак-адрес</button></th>
-					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="compat"'>Модель</button></th>
-					<th > Статус</th>
-					<th > Пинг</th>
-					<th > <button type="button" class="btn btn-primary btn-block" v-on:click='sort_by="firmware-version"'>Прошивка</button></th>
+					<th style="cursor:pointer;" v-on:click='sort_by="location";sort_by_key(sort_by)'>Имя</th>
+					<th style="cursor:pointer;" v-on:click='sort_by="ip";sort_by_key(sort_by)'>IP</th>
+					<th style="cursor:pointer;"  v-on:click='sort_by="mac";sort_by_key(sort_by)'>Мак-адрес</th>
+					<th style="cursor:pointer;"  v-on:click='sort_by="compat";sort_by_key(sort_by)'>Модель</th>
+					<th style="cursor:pointer;"  v-on:click='sort_by="status";sort_by_key(sort_by)'> Статус</th>
+					<th style="cursor:pointer;"  v-on:click='sort_by="ping";sort_by_key(sort_by)'> Пинг</th>
+					<th style="cursor:pointer;" v-on:click='sort_by="firmware-version";sort_by_key(sort_by)'>Прошивка</th>
 					<th > Перезагрузка</th>
 				</tr>
 			</thead>
@@ -45,7 +49,7 @@
 					<td>{{node["firmware-version"]}} </td>
 					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> </td>
 					<td> <button v-on:click='detail(node.ip)' type="button" class="btn btn-info"> подробно </button> </td>
-				</tr>
+                </tr>
 			</tbody>
 		</table>
 		</div>
@@ -121,8 +125,8 @@
                 },
 				sort_by_key:	function(key) {
 					vm.array_nodes.sort(function(a,b){
-						var keyA = a[key].toUpperCase();
-						var keyB = b[key].toUpperCase();
+						var keyA = (a[key]).toString().toUpperCase();
+						var keyB = b[key].toString().toUpperCase();
 						if (keyA < keyB) {
 							return -1;
 						}
