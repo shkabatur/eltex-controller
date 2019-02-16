@@ -93,15 +93,18 @@ def get_detail():
         'username': username,
         'password': password, }
     raw_nodes = ConnectHandler(**some_node).send_command(
-        'get association detail').split('Property               Value\n-----------------------------------------------\n')[1:]
+        'get association detail')
+    raw_nodes = raw_nodes.split('-----------------------------------------------\n')
     client_nodes = []
+
     node = {}
     for n in raw_nodes:
         for params in n.split('\n'):
             p = params.split()
-            if(len(p) > 1):
+            if(len(p) == 2 and p[0] != 'Property'):
+                print(p[0], " : ", p[1])
                 node[p[0]] = p[1]
         client_nodes.append(node)
         node = {}
-    #client_nodes.insert(0, {'name':r['name']})
+    if {} in client_nodes: client_nodes.remove({})
     return jsonify(client_nodes)

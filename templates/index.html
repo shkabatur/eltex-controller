@@ -77,12 +77,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr  style="cursor:pointer;" v-on:click='detail(node.ip,node.location)' v-b-modal.show-detail v-for="node in array_nodes"> 
-					<th>{{node.location}}</th>
-					<td>{{node.ip}}</td>
-					<td>{{node.mac}}</td>
-					<td>{{node.compat}}</td>
-					<td>
+				<tr  style="cursor:pointer;"  v-for="node in array_nodes"> 
+					<th v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.location}}</th>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ip}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.mac}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.compat}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>
 						<template v-if="node.status">
 							<span class="border border-success"><font color="green"> connected </font></span>
 						</template>
@@ -90,8 +90,8 @@
 							<font color="red"> disconnected </font>
 						</template>
 					</td>
-					<td>{{node.ping.toFixed(1)}}ms </td>
-					<td>{{node["firmware-version"]}} </td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ping.toFixed(1)}}ms </td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node["firmware-version"]}} </td>
 					<td v-on:click='reboot(node.ip)'><font color="blue"> restart</font> <i style="color:blue;" class="fas fa-power-off" > </i></td>
                 </tr>
 			</tbody>
@@ -125,8 +125,7 @@
                     vm.spinner = true;
                     vm.node_detail_name = name;
                     vm.node_detail=[];
-					axios.post('/detail', {"ip": ip, "name": name}).then(function(response){
-						vm.node_detail = []
+					axios.post('/detail', {"ip": ip}).then(function(response){
 						for(var key in response.data) {
 								vm.node_detail.push(response.data[key]);
 						}
