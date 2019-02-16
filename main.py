@@ -103,4 +103,5 @@ def get_detail():
                 node[p[0]] = p[1]
         client_nodes.append(node)
         node = {}
+    #client_nodes.insert(0, {'name':r['name']})
     return jsonify(client_nodes)

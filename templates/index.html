@@ -1,60 +1,30 @@
  <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous"> 
-    <title> LOL </title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+<link
+  type="text/css"
+  rel="stylesheet"
+  href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"
+/>
     <link rel="icon" type="image/png" href="https://static.artek.org/static/img/favicon.ico" />
     <style type="text/css">
-        tr {height:10px;}
+        tr {
+            height:10px;
+            cursor:pointer;
+        }
         td {padding:0px;}
+        th {cursor: pointer;}
     </style>
 </head>
 
 <body>
-    <div class="container-fluid">
+    <div class="container">
 		<div class="vue">
-		<button type="button" class="btn" v-on:click='swap_cluster("audag")'>Аюдаг</button>
-        <button type="button" class="btn" v-on:click='swap_cluster("guest")'>Гость</button>
-		
-		<div class="row">
-		<div class="table-responsive col-md-6 table-striped">
-		<table  class="table" >
-			<thead>
-				<tr>
-					<th style="cursor:pointer;" v-on:click='sort_by="location";sort_by_key(sort_by)'>Имя</th>
-					<th style="cursor:pointer;" v-on:click='sort_by="ip";sort_by_key(sort_by)'>IP</th>
-					<th style="cursor:pointer;"  v-on:click='sort_by="mac";sort_by_key(sort_by)'>Мак-адрес</th>
-					<th style="cursor:pointer;"  v-on:click='sort_by="compat";sort_by_key(sort_by)'>Модель</th>
-					<th style="cursor:pointer;"  v-on:click='sort_by="status";sort_by_key(sort_by)'> Статус</th>
-					<th style="cursor:pointer;"  v-on:click='sort_by="ping";sort_by_key(sort_by)'> Пинг</th>
-					<th style="cursor:pointer;" v-on:click='sort_by="firmware-version";sort_by_key(sort_by)'>Прошивка</th>
-					<th > Перезагрузка</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr  v-for="node in array_nodes"> 
-					<th>{{node.location}}</th>
-					<td>{{node.ip}}</td>
-					<td>{{node.mac}}</td>
-					<td>{{node.compat}}</td>
-					<td>
-						<template v-if="node.status">
-							<font color="green"> connected </font>
-						</template>
-						<template v-else>
-							<font color="red"> disconnected </font>
-						</template>
-					</td>
-					<td>{{node.ping.toFixed(1)}}ms </td>
-					<td>{{node["firmware-version"]}} </td>
-					<td> <button v-on:click='reboot(node.ip)' type="button" class="btn btn-danger"> restart </button> </td>
-					<td> <button v-on:click='detail(node.ip)' type="button" class="btn btn-info"> подробно </button> </td>
-                </tr>
-			</tbody>
-		</table>
-		</div>
-		<div class="table-responsive table-striped col-md-6 ">
-		<table  class="table" >
+
+  <b-modal id="show-detail" centered size="xl"  v-bind:title="node_detail_name">
+    <table  class="table" >
 			<thead>
 				<tr>
 					<th> IP</th>
@@ -84,16 +54,58 @@
 				</tr>
 			</tbody>
 		</table>
-		</div>
-	  </div>
-	</div>
+        <template v-if="spinner">
+            <div class="d-flex justify-content-center mb-3">
+                <b-spinner label="Loading..." />
+            </div>
+        </template>
+ 
+  </b-modal>
+		<button type="button" class="btn" v-on:click='swap_cluster("audag")'>Аюдаг</button>
+        <button type="button" class="btn" v-on:click='swap_cluster("guest")'>Гость</button>
+
+		<table  class="table table-striped table-hover" >
+			<thead>
+				<tr>
+					<th   v-on:click='sort_by="location";sort_by_key(sort_by)'>Имя</th>
+					<th   v-on:click='sort_by="ip";sort_by_key(sort_by)'>IP</th>
+					<th   v-on:click='sort_by="mac";sort_by_key(sort_by)'>Мак-адрес</th>
+					<th   v-on:click='sort_by="compat";sort_by_key(sort_by)'>Модель</th>
+					<th   v-on:click='sort_by="status";sort_by_key(sort_by)'> Статус</th>
+					<th   v-on:click='sort_by="ping";sort_by_key(sort_by)'> Пинг</th>
+					<th   v-on:click='sort_by="firmware-version";sort_by_key(sort_by)'>Прошивка</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr  style="cursor:pointer;" v-on:click='detail(node.ip,node.location)' v-b-modal.show-detail v-for="node in array_nodes"> 
+					<th>{{node.location}}</th>
+					<td>{{node.ip}}</td>
+					<td>{{node.mac}}</td>
+					<td>{{node.compat}}</td>
+					<td>
+						<template v-if="node.status">
+							<span class="border border-success"><font color="green"> connected </font></span>
+						</template>
+						<template v-else>
+							<font color="red"> disconnected </font>
+						</template>
+					</td>
+					<td>{{node.ping.toFixed(1)}}ms </td>
+					<td>{{node["firmware-version"]}} </td>
+					<td v-on:click='reboot(node.ip)'><font color="blue"> restart</font> <i style="color:blue;" class="fas fa-power-off" > </i></td>
+                </tr>
+			</tbody>
 	</div>
 </body>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+    <script src="//unpkg.com/@babel/polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+
     <script type="text/javascript">
         var cluster_name = "audag";
+        var spinner = true;
         var vm = new Vue({
             el: '.vue',
             data: { 
@@ -101,22 +113,26 @@
                 cluster_name: cluster_name,
 				node_detail: [],
 				sort_by: "location",
+                spinner: spinner,
+                node_detail_name :"",
             },
             methods: {
                 swap_cluster: function(name) {;
                     vm.cluster_name = name;
 					vm.fast_init();
                 },
-				detail: function(ip) {	
-					vm.node_detail = [{'station':'Идет загрузка', 'hostname':'Подождите'}];
-					axios.post('/detail', {"ip": ip}).then(function(response){
-						console.log(response.data);
+				detail: function(ip,name) {	
+                    vm.spinner = true;
+                    vm.node_detail_name = name;
+                    vm.node_detail=[];
+					axios.post('/detail', {"ip": ip, "name": name}).then(function(response){
 						vm.node_detail = []
 						for(var key in response.data) {
-								//Vue.set(vm.node_detail, response.data[key].station, response.data[key])
 								vm.node_detail.push(response.data[key]);
 						}
+                        vm.spinner = false;
 					});
+                    
 				},
                 reboot: function(ip){
                     if (confirm('Вы уверены ?')) {
