@@ -1,7 +1,10 @@
  <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
 <link
   type="text/css"
@@ -9,21 +12,58 @@
   href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"
 />
     <link rel="icon" type="image/png" href="https://static.artek.org/static/img/favicon.ico" />
-    <style type="text/css">
-        tr {
-            height:10px;
-            cursor:pointer;
-        }
-        td {padding:0px;}
-        th {cursor: pointer;}
-    </style>
+
 </head>
 
 <body>
-    <div class="container">
-		<div class="vue">
+    <div class="container-fluid" style="padding: 0px;"">
+		<div id="app" >
 
-  <b-modal id="show-detail" centered size="xl"  v-bind:title="node_detail_name">
+	<b-navbar toggleable="lg" type="dark" variant="info">
+    <b-navbar-brand href="#">Eltex</b-navbar-brand>
+      <b-navbar-nav>
+        <b-nav-item href="#">Link</b-nav-item>
+        <b-nav-item href="#" disabled>Disabled</b-nav-item>
+      </b-navbar-nav>  
+	</b-navbar>
+
+		<button type="button" class="btn" v-on:click='swap_cluster("audag")'>Аюдаг</button>
+        <button type="button" class="btn" v-on:click='swap_cluster("guest")'>Гость</button>
+		<div class="table-responsive table-striped table-hover">
+		<table  class="table" >
+			<thead>
+				<tr>
+					<th   v-on:click='sort_by="location";sort_by_key(sort_by)'>Имя</th>
+					<th   v-on:click='sort_by="ip";sort_by_key(sort_by)'>IP</th>
+					<th   v-on:click='sort_by="mac";sort_by_key(sort_by)'>Мак-адрес</th>
+					<th   v-on:click='sort_by="compat";sort_by_key(sort_by)'>Модель</th>
+					<th   v-on:click='sort_by="status";sort_by_key(sort_by)'> Статус</th>
+					<th   v-on:click='sort_by="ping";sort_by_key(sort_by)'> Пинг</th>
+					<th   v-on:click='sort_by="firmware-version";sort_by_key(sort_by)'>Прошивка</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr  style="cursor:pointer;"  v-for="node in array_nodes"> 
+					<th v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.location}}</th>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ip}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.mac}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.compat}}</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>
+						<template v-if="node.status">
+							<span class="border border-success"><font color="green"> connected </font></span>
+						</template>
+						<template v-else>
+							<font color="red"> disconnected </font>
+						</template>
+					</td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ping.toFixed(1)}}ms </td>
+					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node["firmware-version"]}} </td>
+					<td v-on:click='reboot(node.ip)'><font color="blue"> restart</font> <i style="color:blue;" class="fas fa-power-off" > </i></td>
+                </tr>
+			</tbody>
+		</table>
+		</div>
+  <b-modal id="show-detail" centered no-stacking size="xl"  v-bind:title="node_detail_name" >
     <table  class="table" >
 			<thead>
 				<tr>
@@ -59,43 +99,8 @@
                 <b-spinner label="Loading..." />
             </div>
         </template>
- 
-  </b-modal>
-		<button type="button" class="btn" v-on:click='swap_cluster("audag")'>Аюдаг</button>
-        <button type="button" class="btn" v-on:click='swap_cluster("guest")'>Гость</button>
-
-		<table  class="table table-striped table-hover" >
-			<thead>
-				<tr>
-					<th   v-on:click='sort_by="location";sort_by_key(sort_by)'>Имя</th>
-					<th   v-on:click='sort_by="ip";sort_by_key(sort_by)'>IP</th>
-					<th   v-on:click='sort_by="mac";sort_by_key(sort_by)'>Мак-адрес</th>
-					<th   v-on:click='sort_by="compat";sort_by_key(sort_by)'>Модель</th>
-					<th   v-on:click='sort_by="status";sort_by_key(sort_by)'> Статус</th>
-					<th   v-on:click='sort_by="ping";sort_by_key(sort_by)'> Пинг</th>
-					<th   v-on:click='sort_by="firmware-version";sort_by_key(sort_by)'>Прошивка</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr  style="cursor:pointer;"  v-for="node in array_nodes"> 
-					<th v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.location}}</th>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ip}}</td>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.mac}}</td>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.compat}}</td>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>
-						<template v-if="node.status">
-							<span class="border border-success"><font color="green"> connected </font></span>
-						</template>
-						<template v-else>
-							<font color="red"> disconnected </font>
-						</template>
-					</td>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node.ping.toFixed(1)}}ms </td>
-					<td v-on:click='detail(node.ip,node.location)'  v-b-modal.show-detail>{{node["firmware-version"]}} </td>
-					<td v-on:click='reboot(node.ip)'><font color="blue"> restart</font> <i style="color:blue;" class="fas fa-power-off" > </i></td>
-                </tr>
-			</tbody>
-	</div>
+   </b-modal>
+</div>
 </body>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
@@ -107,7 +112,7 @@
         var cluster_name = "audag";
         var spinner = true;
         var vm = new Vue({
-            el: '.vue',
+            el: '#app',
             data: { 
 				array_nodes: [],
                 cluster_name: cluster_name,

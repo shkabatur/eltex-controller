@@ -48,7 +48,10 @@ def parse_clusternodes(ip):
 for key in clusters:
     clusters[key]['nodes'] = parse_clusternodes(clusters[key]['ip'])
 
+def update():
+    pass
 
+                
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
