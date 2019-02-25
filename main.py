@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, send_from_directory, request
 from multiping import multi_ping
 from netmiko import ConnectHandler
+import threading
 from pprint import pprint
 import re
 import time
@@ -12,15 +13,15 @@ password = "T$2z-artek"
 clusters = {
     'audag': {
         'ip' : '10.55.15.140',
-        'nodes': [],
+        'nodes': {},
     },
     'guest': {
         'ip' : '10.55.13.111',
-        'nodes': [],
+        'nodes': {},
     },
     'boss': {
         'ip' : '172.16.13.222',
-        'nodes': [],
+        'nodes': {},
     }
 }
 
@@ -34,27 +35,32 @@ def parse_clusternodes(ip):
     
     raw_cn = ConnectHandler(**cluster).send_command(
     'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
-    cluster_nodes = []
+    cluster_nodes = {}
     node = {}
     for n in raw_cn:
         for params in n.split('\n'):
             p = params.split()
             if(len(p) > 1):
                 node[p[0]] = p[1]
-        cluster_nodes.append(node)
+        cluster_nodes[node['mac']] = node
         node = {}
     return cluster_nodes
 
 for key in clusters:
     clusters[key]['nodes'] = parse_clusternodes(clusters[key]['ip'])
 
-def update():
-    pass
+def auto_update(time):
+    for key in clusters:
+        clusters[key]['nodes'].update(parse_clusternodes(clusters[key]['ip']))
+    threading.Timer(time,auto_update,[time]).start()
+    print('auto_update')
 
                 
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+auto_update(30)
 
 @app.route('/')
 def index():
@@ -75,7 +81,7 @@ def reboot():
 
 @app.route('/<name>')
 def get_cluster_nodes(name):
-    nodes = clusters[name]['nodes'].copy()
+    nodes = list(clusters[name]['nodes'].values())
     ips = [ n['ip'] for n in nodes]
     resp, no_resp = multi_ping(ips, timeout=2, retry=3)
     for n in nodes:
