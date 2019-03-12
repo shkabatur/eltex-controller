@@ -19,12 +19,15 @@ clusters = {
         'ip' : '10.55.13.111',
         'nodes': {},
     },
-    'boss': {
-        'ip' : '172.16.13.222',
-        'nodes': {},
-    }
 }
 
+def auto_update(time):
+    for key in clusters:
+            nodes = parse_clusternodes(clusters[key]['ip'])
+            if nodes :
+                clusters[key]['nodes'].update(nodes)
+    threading.Timer(time,auto_update,[time]).start()
+    print('auto_update')
 
 def parse_clusternodes(ip):
     cluster = {
@@ -32,9 +35,11 @@ def parse_clusternodes(ip):
         'ip':   ip,
         'username': username,
         'password': password, }
-    
-    raw_cn = ConnectHandler(**cluster).send_command(
-    'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
+    try:
+        raw_cn = ConnectHandler(**cluster).send_command(
+        'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
+    except:
+        return False
     cluster_nodes = {}
     node = {}
     for n in raw_cn:
@@ -46,16 +51,14 @@ def parse_clusternodes(ip):
         node = {}
     return cluster_nodes
 
+
+
 for key in clusters:
-    clusters[key]['nodes'] = parse_clusternodes(clusters[key]['ip'])
+    nodes = parse_clusternodes(clusters[key]['ip'])
+    if nodes :
+        clusters[key]['nodes']
 
-def auto_update(time):
-    for key in clusters:
-        clusters[key]['nodes'].update(parse_clusternodes(clusters[key]['ip']))
-    threading.Timer(time,auto_update,[time]).start()
-    print('auto_update')
-
-                
+             
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
