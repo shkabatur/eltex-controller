@@ -38,7 +38,8 @@ def parse_clusternodes(ip):
     try:
         raw_cn = ConnectHandler(**cluster).send_command(
         'get cluster-member detail').split('Property            Value\n''-------------------------------------\n')[1:]
-    except:
+    except Exception as e:
+        print(e)
         return False
     cluster_nodes = {}
     node = {}
