@@ -59,12 +59,12 @@ for key in clusters:
     if nodes :
         clusters[key]['nodes']
 
-             
+
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-auto_update(30)
+auto_update(1800)
 
 @app.route('/')
 def index():
