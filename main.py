@@ -61,6 +61,9 @@ for key in clusters:
 
 
 
+    #auto_update(1800)
+
+
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -121,3 +124,9 @@ def get_detail():
         node = {}
     if {} in client_nodes: client_nodes.remove({})
     return jsonify(client_nodes)
+
+
+if __name__ == "__main__":
+    #app = Flask(__name__)
+    #app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.run(host="0.0.0.0",port=8005)
