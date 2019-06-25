@@ -19,6 +19,10 @@ clusters = {
         'ip' : '10.55.13.111',
         'nodes': {},
     },
+    'skala': {
+        'ip' : '10.55.12.123',
+        'nodes': {},
+    },
 }
 
 def auto_update(time):
