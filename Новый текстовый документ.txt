@@ -1,9 +1,0 @@
-ip-address
-hostname
-station
-interface wlan0=5ГГЦ wlan1=2.4ГГЦ
-uptime
-rx-bytes / 1024 / 1024
-tx-bytes / 1024 / 1024
-tx-link-quality
-
